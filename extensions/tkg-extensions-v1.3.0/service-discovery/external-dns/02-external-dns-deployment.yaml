@@ -1,0 +1,36 @@
+#@ load("/values.star", "values")
+#@ load("/globals.star", "get_image_location", "globals")
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: #@ values.externalDns.namespace
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: external-dns
+  template:
+    metadata:
+      labels:
+        app: external-dns
+      #@ if/end values.externalDns.deployment.annotations:
+      annotations: #@ values.externalDns.deployment.annotations
+    spec:
+      serviceAccountName: external-dns
+      containers:
+      - name: external-dns
+        image: #@ get_image_location(values.externalDns.image.repository, values.externalDns.image.name, values.externalDns.image.tag)
+        imagePullPolicy: #@ values.externalDns.image.pullPolicy
+        args: #@ values.externalDns.deployment.args
+        #@ if/end values.externalDns.deployment.env:
+        env: #@ values.externalDns.deployment.env
+        #@ if/end values.externalDns.deployment.securityContext:
+        securityContext: #@ values.externalDns.deployment.securityContext
+        #@ if/end values.externalDns.deployment.volumeMounts:
+        volumeMounts: #@ values.externalDns.deployment.volumeMounts
+      #@ if/end values.externalDns.deployment.volumes:
+      volumes: #@ values.externalDns.deployment.volumes

@@ -1,0 +1,17 @@
+
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.all
+#@overlay/match-child-defaults missing_ok=True
+---
+CLUSTER_PLAN: dev
+CONTROL_PLANE_MACHINE_COUNT: 3
+WORKER_MACHINE_COUNT: 6
+VSPHERE_CONTROL_PLANE_ENDPOINT: #@ data.values.tkg.guest_cluster.controlplane.endpoint
+VSPHERE_WORKER_DISK_GIB: #@ data.values.tkg.guest_cluster.worker.disk
+VSPHERE_WORKER_NUM_CPUS: #@ data.values.tkg.guest_cluster.worker.cpu
+VSPHERE_WORKER_MEM_MIB: #@ data.values.tkg.guest_cluster.worker.memory
+VSPHERE_CONTROL_PLANE_DISK_GIB: #@ data.values.tkg.guest_cluster.controlplane.disk
+VSPHERE_CONTROL_PLANE_NUM_CPUS: #@ data.values.tkg.guest_cluster.controlplane.cpu
+VSPHERE_CONTROL_PLANE_MEM_MIB: #@ data.values.tkg.guest_cluster.controlplane.memory

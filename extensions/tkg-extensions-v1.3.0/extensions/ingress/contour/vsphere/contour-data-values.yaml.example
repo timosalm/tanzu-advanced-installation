@@ -1,0 +1,12 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+contour:
+  image:
+    repository: projects.registry.vmware.com/tkg
+envoy:
+  image:
+    repository: projects.registry.vmware.com/tkg
+  service:
+    type: "NodePort"

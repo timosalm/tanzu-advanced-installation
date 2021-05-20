@@ -1,0 +1,55 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@data/values
+---
+vsphere:
+  vcenter_server: vcsa-01.haas-XXX.pez.vmware.com
+  username: "administrator@vsphere.local"
+  password: ""
+  datacenter: Datacenter
+  cluster: Cluster
+  resource_pool: tkg
+  network: "Extra"
+  datastore: LUN01
+  vm_folder: tkg
+  storage_policy_name: tkg-storage-policy
+avi:
+  controller_ip: 10.213.217.200
+  password: 
+  network: Extra
+  network_cdir: 10.213.217.0/24
+  ca_data_b64: 
+tmc:
+  registration_url:
+tkg:
+  ssh_public_key: 
+  management_cluster:
+    controlplane:
+      endpoint: 10.213.217.2
+      cpu: 2
+      memory: 4096
+      disk: 30
+    worker:
+      cpu: 2
+      memory: 4096
+      disk: 30
+  guest_cluster:
+    controlplane:
+      endpoint: 10.213.217.3
+      cpu: 2
+      memory: 4096
+      disk: 30
+    worker:
+      cpu: 4
+      memory: 32768
+      disk: 100
+ingress:
+  domain: demo.example.com
+  contour_tls_namespace: tanzu-system-ingress
+  contour_tls_secret: contour-tls-delegation-cert
+acme:
+  email: user@example.com
+aws:
+gcp:
+  project: 
+  key: 

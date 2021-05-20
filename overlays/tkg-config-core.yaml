@@ -1,0 +1,19 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.all
+#@overlay/match-child-defaults missing_ok=True
+---
+INFRASTRUCTURE_PROVIDER: vsphere
+VSPHERE_SERVER: #@ data.values.vsphere.vcenter_server
+VSPHERE_USERNAME: #@ data.values.vsphere.username
+VSPHERE_PASSWORD: #@ data.values.vsphere.password
+VSPHERE_DATACENTER: #@ "/{}".format(data.values.vsphere.datacenter)
+VSPHERE_RESOURCE_POOL: #@ "/{}/host/{}/Resources/{}".format(data.values.vsphere.datacenter,data.values.vsphere.cluster, data.values.vsphere.resource_pool)
+VSPHERE_FOLDER: #@ "/{}/vm/{}".format(data.values.vsphere.datacenter,data.values.vsphere.vm_folder)
+VSPHERE_SSH_AUTHORIZED_KEY: #@ data.values.tkg.ssh_public_key
+CLUSTER_CIDR: 100.96.0.0/11
+VSPHERE_NETWORK: #@ data.values.vsphere.network
+SERVICE_CIDR: 100.64.0.0/13
+VSPHERE_DATASTORE: #@ "/{}/datastore/{}".format(data.values.vsphere.datacenter,data.values.vsphere.datastore)
+VSPHERE_INSECURE: true

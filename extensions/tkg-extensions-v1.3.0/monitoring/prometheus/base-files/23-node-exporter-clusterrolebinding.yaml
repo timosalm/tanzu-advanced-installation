@@ -1,0 +1,16 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    component: "node-exporter"
+    app: prometheus
+  name: prometheus-node-exporter
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-node-exporter
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-node-exporter

@@ -1,0 +1,11 @@
+#@ load("@ytt:data", "data")
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: default
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: csi.vsphere.vmware.com
+parameters:
+  storagepolicyname: #@ data.values.vsphere.storage_policy_name

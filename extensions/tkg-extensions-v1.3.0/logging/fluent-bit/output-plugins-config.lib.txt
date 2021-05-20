@@ -1,0 +1,85 @@
+(@ load("@ytt:struct", "struct") @)
+
+(@- def get_output_elastic_config(fluent_elasticsearch_host,fluent_elasticsearch_port,fluent_elasticsearch_buffer_size,fluent_elasticsearch_tls): -@)
+[OUTPUT]
+    Name            es
+    Match           *
+    Host            (@=fluent_elasticsearch_host @)
+    Port            (@=fluent_elasticsearch_port @)
+    Logstash_Format On
+    Replace_Dots    On
+    Retry_Limit     False
+    Buffer_Size     (@=fluent_elasticsearch_buffer_size @)
+    tls             (@=fluent_elasticsearch_tls @)
+(@ end -@)
+
+(@- def get_output_kafka_config(kafka_broker_service_name,kafka_topic_name): -@)
+[OUTPUT]
+    Name           kafka
+    Match          *
+    Brokers        (@=kafka_broker_service_name @):9092
+    Topics         (@=kafka_topic_name @)
+    Timestamp_Key  @timestamp
+    Retry_Limit    false
+    # hides errors "Receive failed: Disconnected" when kafka kills idle connections
+    rdkafka.log.connection.close false
+    # producer buffer is not included in http://fluentbit.io/documentation/0.12/configuration/memory_usage.html#estimating
+    rdkafka.queue.buffering.max.kbytes 10240
+    # for logs you'll probably want this to be 0 or 1, not more
+    rdkafka.request.required.acks 1
+(@ end -@)
+
+(@- def get_output_splunk_config(splunk_host,splunk_port,splunk_token): -@)
+[OUTPUT]
+    Name           splunk
+    Match          *
+    Host           (@=splunk_host @)
+    Port           (@=splunk_port @)
+    Splunk_Token   (@=splunk_token @)
+    TLS            On
+    TLS.Verify     Off
+(@ end -@)
+
+(@- def get_output_http_config(http_host, http_port, http_uri, http_header_key_value, http_format): -@)
+[OUTPUT]
+    Name              http
+    Match             *
+    Host              (@=http_host @)
+    Port              (@=http_port @)
+    URI               (@=http_uri @)
+    Header            (@=http_header_key_value @)
+    Format            (@=http_format @)
+    tls               On
+(@ end @)
+
+(@- def get_output_syslog_config(syslog_host, syslog_port, syslog_mode, syslog_format): -@)
+[OUTPUT]
+    Name   syslog
+    Match  kube.*
+    Host   (@=syslog_host @)
+    Port   (@=syslog_port @)
+    Mode   (@=syslog_mode @)
+    Syslog_Format        (@=syslog_format @)
+    Syslog_Hostname_key  tkg_cluster
+    Syslog_Appname_key   pod_name
+    Syslog_Procid_key    container_name
+    Syslog_Message_key   message
+    Syslog_SD_key        k8s
+    Syslog_SD_key        labels
+    Syslog_SD_key        annotations
+    Syslog_SD_key        tkg
+
+[OUTPUT]
+    Name   syslog
+    Match  kube_systemd.*
+    Host   (@=syslog_host @)
+    Port   (@=syslog_port @)
+    Mode   (@=syslog_mode @)
+    Syslog_Format        (@=syslog_format @)
+    Syslog_Hostname_key  tkg_cluster
+    Syslog_Appname_key   tkg_instance
+    Syslog_Message_key   MESSAGE
+    Syslog_SD_key        systemd
+(@ end @)
+
+(@ output_plugins_config = struct.make(get_output_elastic_config=get_output_elastic_config, get_output_kafka_config=get_output_kafka_config, get_output_splunk_config=get_output_splunk_config, get_output_http_config=get_output_http_config, get_output_syslog_config=get_output_syslog_config) @)

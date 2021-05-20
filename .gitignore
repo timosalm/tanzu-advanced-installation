@@ -1,0 +1,4 @@
+/values.yaml
+generated/*
+!generated/README.md
+.envrc

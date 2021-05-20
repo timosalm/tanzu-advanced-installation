@@ -1,0 +1,40 @@
+apiVersion: clusters.tmc.cloud.vmware.com/v1alpha1
+kind: Extension
+metadata:
+  name: external-dns
+  namespace: tanzu-system-service-discovery
+  annotations:
+    tmc.cloud.vmware.com/managed: "false"
+spec:
+  description: external-dns
+  version: "v0.7.4_vmware.1"
+  name: external-dns
+  namespace: tanzu-system-service-discovery
+  deploymentStrategy:
+    type: KUBERNETES_NATIVE
+  objects: |
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: external-dns
+      annotations:
+        tmc.cloud.vmware.com/orphan-resource: "true"
+    spec:
+      syncPeriod: 5m
+      serviceAccountName: external-dns-extension-sa
+      fetch:
+        - image:
+            url: projects.registry.vmware.com/tkg/tkg-extensions-templates:v1.3.0_vmware.1
+      template:
+        - ytt:
+            ignoreUnknownComments: true
+            paths:
+              - tkg-extensions/common
+              - tkg-extensions/service-discovery/external-dns
+            inline:
+              pathsFrom:
+                - secretRef:
+                    name: external-dns-data-values
+      deploy:
+        - kapp:
+            rawOptions: ["--wait-timeout=5m"]
