@@ -4,7 +4,7 @@
 #@overlay/match by=overlay.all
 #@overlay/match-child-defaults missing_ok=True
 ---
-CLUSTER_NAME: mgmt
+CLUSTER_NAME: #@ data.values.tkg.management_cluster.name
 CLUSTER_PLAN: dev
 TMC_REGISTRATION_URL: #@ data.values.tmc.registration_url
 VSPHERE_CONTROL_PLANE_ENDPOINT: #@ data.values.tkg.management_cluster.controlplane.endpoint

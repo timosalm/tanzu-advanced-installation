@@ -1,5 +1,3 @@
-#@ load("@ytt:data", "data")
-#@ load("@ytt:base64", "base64")
 #@data/values
 ---
 vsphere:
@@ -22,8 +20,9 @@ avi:
 tmc:
   registration_url:
 tkg:
-  ssh_public_key: 
+  ssh_public_key: ssh-rsa AAAAB3N...
   management_cluster:
+    name: mgmt
     controlplane:
       endpoint: 10.213.217.2
       cpu: 2
@@ -33,13 +32,15 @@ tkg:
       cpu: 2
       memory: 4096
       disk: 30
-  guest_cluster:
+  workload_cluster:
     controlplane:
+      machine_count: 3
       endpoint: 10.213.217.3
       cpu: 2
       memory: 4096
       disk: 30
     worker:
+      machine_count: 5
       cpu: 4
       memory: 32768
       disk: 100
@@ -49,7 +50,14 @@ ingress:
   contour_tls_secret: contour-tls-delegation-cert
 acme:
   email: user@example.com
-aws:
-gcp:
-  project: 
-  key: 
+aws: # Remove nested properties if you are not using Route53 to manage the domain / for external DNS
+  region: us-east-1
+  credentials:
+    secretKey: SECRET
+    accessKey: ACCESS
+gcp: # Remove nested properties if you are not using GCP to manage the domain / for external DNS
+  project: project-name
+  key: # Base64 encoded gcp.key.json file content
+harbor:
+  adminPassword: 
+  diskSize: 50Gi

@@ -2,3 +2,8 @@
 generated/*
 !generated/README.md
 .envrc
+TODO.md
+extensions/*
+tbs/*
+!tbs/README.md
+

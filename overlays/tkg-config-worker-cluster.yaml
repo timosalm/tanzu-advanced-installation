@@ -6,12 +6,12 @@
 #@overlay/match-child-defaults missing_ok=True
 ---
 CLUSTER_PLAN: dev
-CONTROL_PLANE_MACHINE_COUNT: 3
-WORKER_MACHINE_COUNT: 6
-VSPHERE_CONTROL_PLANE_ENDPOINT: #@ data.values.tkg.guest_cluster.controlplane.endpoint
-VSPHERE_WORKER_DISK_GIB: #@ data.values.tkg.guest_cluster.worker.disk
-VSPHERE_WORKER_NUM_CPUS: #@ data.values.tkg.guest_cluster.worker.cpu
-VSPHERE_WORKER_MEM_MIB: #@ data.values.tkg.guest_cluster.worker.memory
-VSPHERE_CONTROL_PLANE_DISK_GIB: #@ data.values.tkg.guest_cluster.controlplane.disk
-VSPHERE_CONTROL_PLANE_NUM_CPUS: #@ data.values.tkg.guest_cluster.controlplane.cpu
-VSPHERE_CONTROL_PLANE_MEM_MIB: #@ data.values.tkg.guest_cluster.controlplane.memory
+CONTROL_PLANE_MACHINE_COUNT: #@ data.values.tkg.workload_cluster.controlplane.machine_count
+WORKER_MACHINE_COUNT: #@ data.values.tkg.workload_cluster.worker.machine_count
+VSPHERE_CONTROL_PLANE_ENDPOINT: #@ data.values.tkg.workload_cluster.controlplane.endpoint
+VSPHERE_WORKER_DISK_GIB: #@ data.values.tkg.workload_cluster.worker.disk
+VSPHERE_WORKER_NUM_CPUS: #@ data.values.tkg.workload_cluster.worker.cpu
+VSPHERE_WORKER_MEM_MIB: #@ data.values.tkg.workload_cluster.worker.memory
+VSPHERE_CONTROL_PLANE_DISK_GIB: #@ data.values.tkg.workload_cluster.controlplane.disk
+VSPHERE_CONTROL_PLANE_NUM_CPUS: #@ data.values.tkg.workload_cluster.controlplane.cpu
+VSPHERE_CONTROL_PLANE_MEM_MIB: #@ data.values.tkg.workload_cluster.controlplane.memory
