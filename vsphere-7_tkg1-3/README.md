@@ -119,7 +119,10 @@ If you don't have a domain you can use for it, ask your colleagues.
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually). The *-data-values.yaml files in the overlays sub folders are modified copies of the templates in the tkg extensions bundle.
 ```
 ./scripts/setup-ingress-and-service-discovery.sh
+watch kubectl get apps -A
 ```
+Wait until the descriptions equal "Reconcile succeeded".
+
 **Known Issues:** 
 - Due to some Contour issues related to HTTP2 with Safari, HTTP2 is disabled via the overlays/contour/contour-data-values.yaml configuration. https://projectcontour.io/resources/faq/#q-when-i-load-my-site-in-safari-it-shows-me-an-empty-page-developer-tools-show-that-the-http-response-was-421-why-does-this-happen
 
@@ -139,7 +142,9 @@ The setup script will run a script that is part of the TKG extensions to generat
 
 ```
 ./scripts/setup-harbor.sh
+watch kubectl get apps -A
 ```
+Wait until the description equals "Reconcile succeeded".
 
 **Known Issues:** 
 Due to the large size of the TBS container images:
