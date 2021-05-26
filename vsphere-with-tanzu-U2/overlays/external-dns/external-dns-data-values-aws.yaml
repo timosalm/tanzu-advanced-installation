@@ -31,4 +31,3 @@ externalDns:
         secretKeyRef:
           name: route53-credentials #! Kubernetes secret for route53 credentials
           key: aws_secret_access_key
-    #@ end

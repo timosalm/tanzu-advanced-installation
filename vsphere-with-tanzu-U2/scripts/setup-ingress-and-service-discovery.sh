@@ -19,8 +19,8 @@ fi
 kubectl create secret generic contour-data-values --from-file=values.yaml=overlays/contour/contour-data-values.yaml -n tanzu-system-ingress
 
 CONFIGURED_INGRESS_DOMAIN=$(cat $VALUES_YAML | grep ingress -A 3 | awk '/domain:/ {print $2}')
-EXTERNALDNS_HOSTNAME_OVERLAY=$(cat overlays/contour/external-dns-hostname-overlay.yaml | sed "s/INGRESS_DOMAIN/$CONFIGURED_INGRESS_DOMAIN/")
-kubectl create configmap external-dns-hostname-overlay --from-literal=external-dns-hostname-overlay.yaml="$EXTERNALDNS_HOSTNAME_OVERLAY" -n tanzu-system-ingress
+cat overlays/contour/external-dns-hostname-overlay.yaml | sed "s/INGRESS_DOMAIN/$CONFIGURED_INGRESS_DOMAIN/" > generated/external-dns-hostname-overlay.yaml
+kubectl create configmap external-dns-hostname-overlay --from-file=external-dns-hostname-overlay.yaml=generated/external-dns-hostname-overlay.yaml -n tanzu-system-ingress
 cat extensions/tkg-extensions-v1.3.0/extensions/ingress/contour/contour-extension.yaml | sed "s/name: contour-data-values/name: contour-data-values\n                - configMapRef:\n                    name: external-dns-hostname-overlay/" | kubectl apply -f-
 
 # External DNS
@@ -35,11 +35,11 @@ fi
 
 ## Configure external dns provider. ytt doesn't support referencing data values from data values at this point!
 CONFIGURED_GCP_PROJECT_NAME=$(cat values.yaml | grep gcp -A 3 | awk '/project:/ {print $2}')
-EXTERNALDNS_DATAVALUES=$(cat overlays/external-dns/external-dns-data-values-aws.yaml)
+cp overlays/external-dns/external-dns-data-values-aws.yaml generated/external-dns-data-values.yaml
 if [ -n "$CONFIGURED_GCP_PROJECT_NAME" ]; then
-    EXTERNALDNS_DATAVALUES=$(cat overlays/external-dns/external-dns-data-values-gcp.yaml | sed "s/REPLACE_WITH_GCP_PROJECT/$CONFIGURED_GCP_PROJECT_NAME/")
+    cat overlays/external-dns/external-dns-data-values-gcp.yaml | sed "s/REPLACE_WITH_GCP_PROJECT/$CONFIGURED_GCP_PROJECT_NAME/" | tee generated/external-dns-data-values.yaml
 fi
-EXTERNALDNS_DATAVALUES=$(echo $EXTERNALDNS_DATAVALUES | sed "s/REPLACE_WITH_INGRESS_DOMAIN/$CONFIGURED_INGRESS_DOMAIN/")
+cat generated/external-dns-data-values.yaml | sed "s/REPLACE_WITH_INGRESS_DOMAIN/$CONFIGURED_INGRESS_DOMAIN/" | tee generated/external-dns-data-values.yaml
 
-kubectl create secret generic external-dns-data-values --from-literal=values.yaml="$EXTERNALDNS_DATAVALUES" -n tanzu-system-service-discovery
+kubectl create secret generic external-dns-data-values --from-file=values.yaml=generated/external-dns-data-values.yaml -n tanzu-system-service-discovery
 kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/service-discovery/external-dns/external-dns-extension.yaml
