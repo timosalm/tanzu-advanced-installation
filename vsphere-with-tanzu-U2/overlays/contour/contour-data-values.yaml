@@ -1,0 +1,17 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+contour:
+  image:
+    repository: projects.registry.vmware.com/tkg
+  config:
+    #@overlay/replace
+    defaultHTTPVersions: 
+    - "HTTP/1.1"
+envoy:
+  image:
+    repository: projects.registry.vmware.com/tkg
+  service:
+    type: "LoadBalancer"
+    externalTrafficPolicy: Cluster

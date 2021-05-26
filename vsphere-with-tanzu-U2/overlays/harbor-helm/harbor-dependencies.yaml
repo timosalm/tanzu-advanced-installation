@@ -1,0 +1,16 @@
+
+#@ load("@ytt:data", "data")
+#@ if hasattr(data.values.harbor, "diskSize"):
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: harbor
+  name: harbor-registry-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: #@ data.values.harbor.diskSize
+#@ end

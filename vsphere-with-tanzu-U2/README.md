@@ -1,4 +1,4 @@
-# Unofficial Tanzu Advanced PoC guide for TKG 1.3 on vSphere 7
+# Unofficial Tanzu Advanced PoC guide for vSphere with Tanzu U2
 
 It's always recommended to go through the official documentation in addition to this guide!
 The scripts and commands in this guide were executed on a Linux jumpbox.
@@ -9,29 +9,29 @@ If you don't have a domain you can use for it, ask your colleagues.
 
 ## Environment 
 The installation was tested with the following environments:
-- PEZ IaaS Only - vSphere (7.0 U2)
+- PEZ TKGs - vSphere with Kubernetes 7.0 U2 (Nested env with 3 virtual ESX hypervisors on one host). We had performance issues with TBS and Harbor, so the **external network zone** for the environment and a **SSD disk** are recommended!
 
-## TKG-m 1.3 on vSphere 7
+## vSphere with Tanzu U2
 
-### Download and install the Tanzu CLI and kubectl
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-install-cli.html#download-and-unpack-the-tanzu-cli-and-kubectl-1*
+### Create and configure a Supervisor namespace
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-177C23C4-ED81-4ADD-89A2-61654C18201B.html*
+1. Go to Menu > Workload Management > Namespaces > NEW NAMESPACE
+2. Name your namespace and select a cluster
+3. Assign a Storage Policy to the namespace (e.g. for PEZ pacific-gold-storage-policy)
 
+### Download and install the Kubernetes CLI Tools for vSphere
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-0F6E45C4-3CB1-4562-9370-686668519FCA.html?hWord=N4IghgNiBcINYFcBGBTAxgFygXyA*
 *PEZHint: Because you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
+```
+unzip vsphere-plugin.zip
+chmod +x bin/kubectl bin/kubectl-vsphere
+sudo mv bin/* /usr/local/bin/
+```
 
-#### Upack and install the tools
-```
-tar -xvf tanzu-cli-bundle-linux-amd64.tar
-gunzip kubectl-linux-v1.20.4-vmware.1.gz
-cd cli
-sudo install core/v1.3.0/tanzu-core-linux_amd64 /usr/local/bin/tanzu
-cd ..
-tanzu plugin install --local cli all
-tanzu plugin list
-mv kubectl-linux-v1.20.4-vmware.1 kubectl
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/kubectl
-```
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html#install-carvel*
+### Download and install the carvel tools
+*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-install-cli.html#download-and-unpack-the-tanzu-cli-and-kubectl-1*, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html#install-carvel*
+
+The easiest way to get all the carvel tools is to download them bundled with the Tanzu CLI.
 ```
 cd cli
 gunzip *.gz
@@ -41,77 +41,52 @@ sudo mv kapp-linux-amd64-v0.33.0+vmware.1  /usr/local/bin/kapp
 sudo mv kbld-linux-amd64-v0.24.0+vmware.1 /usr/local/bin/kbld
 sudo mv ytt-linux-amd64-v0.30.0+vmware.1 /usr/local/bin/ytt
 ```
-### Prerequisites
-####  Required Permissions for the vSphere Account
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-mgmt-clusters-vsphere.html#vsphere-permissions*
 
-#### Import the Base Image Template into vSphere
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-mgmt-clusters-vsphere.html#import-base*
-*PEZHint: Because you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
-
-**Known Issues:** 
-- There is a bug with Photon v3 Kubernetes v1.20.4 OVA image(photon-3-kube-v1.20.4-vmware.1-tkg.0-2326554155028348692.ova) and kube-vip, use the Ubuntu image instead! 
-
-#### Create an SSH Key Pair to be able to connect to the node VMs
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-mgmt-clusters-vsphere.html#create-an-ssh-key-pair-6*
-```
-ssh-keygen -t rsa -b 4096 -C "emea-end-to-end@vmware.com"
-```
-Path e.g. ~/tkg/ssh-keys/id_rsa
-
-#### Create Persistent Volumes with Storage Classes
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-tanzu-k8s-clusters-storage.html#create-policy*
-*PEZHint: Go through the steps for Local VMFS Storage*
-
-#### Install VMware NSX Advanced Load Balancer on a vSphere Distributed Switch
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-mgmt-clusters-install-nsx-adv-lb.html*
-- Use DHCP Network (e.g. Extra on PEZ) if available
-- Configure default cloud and use ip instead of dns name for vcenter if hostname doesn't work (e.g. nslookup vcsa-01.haas-421.pez.vmware.com)
-- Set the DNS if you are e.g. on PEZ so the hostname can be resolved
-- Set VIPs for your Subnet
-
-Troubleshoot service type LoadBalancer via incoming traffic on Kubernets nodes:
-```
-tcpdump -i eth0 port 30038 # see incoming requests
-iptables -L
-ip addr
-ss -ltmp # see ports listening
-ss -ltm
-``` 
-
-#### Copy values-example.yaml to values.yaml and set configuration values
+### Copy values-example.yaml to values.yaml and set configuration values
 - The values that are already set as an example are based on a specific PEZ environment - change them for your environment if necessary
-- Select a static ip for the control planes enpoints that are not in the DHCP Range.
-- To register your managment cluster with TMC follow the instructions [here](https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-EB507AAF-5F4F-400F-9623-BA611233E0BD.html) and configure the URL provided on the register page in the values.yaml
-### Create Management Cluster and Workload Cluster
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-mgmt-clusters-deploy-cli.html, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-tanzu-k8s-clusters-vsphere.html*
+- The Storage Policy should be same you assigned in the step "Create and configure a Supervisor namespace"
 
-It's recommended to have a look at the following script before you run it (and maybe run every of the commands manually)
+### Login to supervisor cluster namespace
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-F5114388-1838-4B3B-8A8D-4AE17F33526A.html*
+
+```
+kubectl vsphere login --server wcp.haas-xxx.pez.vmware.com --insecure-skip-tls-verify -u administrator@vsphere.local
+kubectl config use-context <your-supervisor-namespace>
+```
+
+### Create workload cluster
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-2597788E-2FA4-420E-B9BA-9423F8F7FD9F.html*
+
+It's recommended to have a look at the following script and Kubernetes resource file before you execute the command.
 ```
 ./scripts/setup-cluster.sh
 ```
-If you change something in the configuration, after you ran the script, dont't forget to delete the relevant file in the "generated" 
-folder!
 
 To debug the installation, you can run the following command. You have to change the suffix of the config file to the auto generated value!
 ```
 kubectl get po,deploy,cluster,kubeadmcontrolplane,machine,machinedeployment -A --kubeconfig /home/ubuntu/.kube-tkg/tmp/config_xxx
 ```
 
+**Known Issues:** 
+- If you select the extra large and/or guaranteed VM classes, there may be issues with resource utilization (on PEZ).
+
 ### Get Workload Cluster credentials and set the context
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-cluster-lifecycle-connect.html#retrieve-tanzu-kubernetes-cluster-kubeconfig-2*
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-AA3CA6DC-D4EE-47C3-94D9-53D680E43B60.html*
 ```
-tanzu cluster kubeconfig get <workload-cluster-name> --admin
-kubectl config use-context <workload-cluster-name>-admin@<workload-cluster-name>
+kubectl vsphere login --tanzu-kubernetes-cluster-name <your-workload-cluster-name> --server wcp.haas-xxx.pez.vmware.com --insecure-skip-tls-verify -u administrator@vsphere.local
+kubectl config use-context <your-workload-cluster-name>
 ```
 
 ### Download and Unpack the Tanzu Kubernetes Grid Extensions Bundle 1.3
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html?hWord=N4IghgNiBcIMYFMBOAXAtAWzAOzAc2RAF8g#download-and-unpack-the-tanzu-kubernetes-grid-extensions-bundle-2*
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-23D2EADA-199D-4A00-9296-4DA83B399FEC.html*
 
 Unpack the extensions archive in the root of this project(extensions/tkg-extensions-v1.3.0/...).
 
+**Known Issues:** 
+- Tanzu Kubernetes Grid (TKG) 1.3.0 extensions do not function on Tanzu Kubernetes Grid Service clusters when attached to Tanzu Mission Control (TMC): https://kb.vmware.com/s/article/83322
+
 ### Install cert-manager, contour, and external-dns via TKG extensions
-*Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html?hWord=N4IghgNiBcIMYFMBOAXAtAWzAOzAc2RAF8g#installing-extension-prerequisite-components-to-a-cluster-4, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-ingress-contour.html, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-external-dns.html*
+*Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-36C7D7CB-312F-49B6-B542-1D0DBC550198.html, https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-F5A2E647-A45F-4C63-BFD4-74F61C141BFE.html*
 
 The setup requires a DNS zones to be able to create Let's Encrypt certificates and DNS entries to mitigate challenges with e.g. TBS and Harbor. The scripts support Route53 and GCloud DNS, but you can use any provider that is supported by cert-manager, and external-dns. 
 If you don't have a domain you can use for it, ask your colleagues. 
@@ -121,7 +96,7 @@ It's recommended to have a look at the following script and overlays before you 
 ./scripts/setup-ingress-and-service-discovery.sh
 ```
 **Known Issues:** 
-- Due to some Contour issues related to HTTP2 with Safari, HTTP2 is disabled via the overlays/contour/contour-data-values.yaml configuration. https://projectcontour.io/resources/faq/#q-when-i-load-my-site-in-safari-it-shows-me-an-empty-page-developer-tools-show-that-the-http-response-was-421-why-does-this-happen
+- *Fixed via ytt overlay* Due to some Contour issues related to HTTP2 with Safari, HTTP2 is disabled via the overlays/contour/contour-data-values.yaml configuration. https://projectcontour.io/resources/faq/#q-when-i-load-my-site-in-safari-it-shows-me-an-empty-page-developer-tools-show-that-the-http-response-was-421-why-does-this-happen
 
 *Documentation for the deletion of extension if something goes wrong during the installation and you want to retry: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-delete-extensions.html*
 
@@ -133,19 +108,26 @@ It's recommended to have a look at the following script and overlays before you 
 **Known Issues:** 
 - TLSCertificateDelegation does not work with networking.k8s.io/v1 Ingress, use networking.k8s.io/v1beta1 instead. https://github.com/projectcontour/contour/issues/3544
 
-### Install Harbor via TKG extension
+### Install Harbor
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
+
+#### Via TKG extension which may not be supported
 The setup script will run a script that is part of the TKG extensions to generate required passwords. The generate password script requires jq version <=3. Install it e.g. with `snap install yq --channel=v3/stable`.
 
 ```
 ./scripts/setup-harbor.sh
 ```
 
+#### Via Helm chart
+```
+./scripts/setup-harbor-helm.sh
+```
+
 **Known Issues:** 
 Due to the large size of the TBS container images:
-- The default value for the Ingress and HTTPProxs response timeout is 15 secs. This causes issues with the large buildpack images of TBS. In our setup it will be set to 60s via an overlay.
+- *Fixed via ytt overlay* The default value for the Ingress and HTTPProxs response timeout is 15 secs. This causes issues with the large buildpack images of TBS. In our setup it will be set to 60s via an overlay.
 - There might be performance issues if for example the environment is using spinning disks instead of SSDs due to the size of the container images for the buildpacks (503 Service Unavailable). 
-- Ensure that all worker nodes have at least 50 GB of ephemeral storage allocated to them.
+- *Fixed via cluster configuration* Ensure that all worker nodes have at least 50 GB of ephemeral storage allocated to them. To do this on TKGs, mount a 50GB volume at /var/lib to the worker nodes in the TanzuKubernetesCluster resource that corresponds to your TKGs cluster. [These](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-4E68C7F2-C948-489A-A909-C7A1F3DC545F.html) instructions show how to configure storage on worker nodes.
 
 ### Install Tanzu Build Service 1.1
 *Documentation: https://docs.pivotal.io/build-service/1-1/installing.html*
@@ -184,7 +166,13 @@ docker login registry.pivotal.io
 ```
 **Known Issues:** 
 - See "Known Issues" for Harbor
-- There is a bug in containerd 1.4.1(TKGm 1.2.1) that makes it incompatible with TBS.
+- *Fixed via TKG 1.3* There is a bug in containerd 1.4.1(TKGm 1.2.1) that makes it incompatible with TBS.
+- *Fixed via scripts* `forbidden: PodSecurityPolicy: unable to admit pod: []`. In this case we just assign the privilged psp role to anything that is authenticated.
+
+### (Otional) Install GitLab
+```
+./scripts/setup-gitlab.sh
+```
 
 ## Misc
 

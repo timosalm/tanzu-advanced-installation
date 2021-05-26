@@ -1,0 +1,27 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: run.tanzu.vmware.com/v1alpha1
+kind: TanzuKubernetesCluster
+metadata:
+  name: #@ data.values.vsphere.cluster_name
+  namespace: #@ data.values.vsphere.supervisor_namespace
+spec:
+  distribution:
+    version: v1.18
+  topology:
+    controlPlane:
+      count: 1
+      class: best-effort-medium
+      storageClass: #@ data.values.vsphere.storage_policy_name
+    workers:
+      count: 3
+      class: best-effort-medium
+      storageClass: #@ data.values.vsphere.storage_policy_name
+      volumes:
+        - name: tbs
+          mountPath: /var/lib
+          capacity:
+            storage: 50Gi
+  settings:
+    storage:
+      defaultClass: #@ data.values.vsphere.storage_policy_name
