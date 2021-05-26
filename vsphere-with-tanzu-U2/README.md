@@ -21,6 +21,7 @@ The installation was tested with the following environments:
 
 ### Download and install the Kubernetes CLI Tools for vSphere
 *Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-0F6E45C4-3CB1-4562-9370-686668519FCA.html?hWord=N4IghgNiBcINYFcBGBTAxgFygXyA*
+
 *PEZHint: Because you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
 ```
 unzip vsphere-plugin.zip
@@ -60,11 +61,13 @@ kubectl config use-context <your-supervisor-namespace>
 It's recommended to have a look at the following script and Kubernetes resource file before you execute the command.
 ```
 ./scripts/setup-cluster.sh
+wait kubectl get tkc
 ```
+Wait until the cluster phase equals "running".
 
 To debug the installation, you can run the following command. You have to change the suffix of the config file to the auto generated value!
 ```
-kubectl get po,deploy,cluster,kubeadmcontrolplane,machine,machinedeployment -A --kubeconfig /home/ubuntu/.kube-tkg/tmp/config_xxx
+kubectl get po,deploy,cluster,kubeadmcontrolplane,machine,machinedeployment -A
 ```
 
 **Known Issues:** 

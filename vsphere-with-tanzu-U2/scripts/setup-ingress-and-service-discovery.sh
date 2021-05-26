@@ -7,7 +7,7 @@ kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/tmc-extension-manag
 kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/kapp-controller.yaml 
 
 # CertManager
-kapp deploy -a cert-manager -f extensions/tkg-extensions-v1.3.0/cert-manager/ -f <(ytt -f values.yaml -f overlays/cert-manager)
+kapp deploy -a cert-manager -f extensions/tkg-extensions-v1.3.0/cert-manager/ -f <(ytt --ignore-unknown-comments -f values.yaml -f overlays/cert-manager)
 
 # Contour
 kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/ingress/contour/namespace-role.yaml
@@ -20,7 +20,7 @@ kubectl create secret generic contour-data-values --from-file=values.yaml=overla
 
 CONFIGURED_INGRESS_DOMAIN=$(cat $VALUES_YAML | grep ingress -A 3 | awk '/domain:/ {print $2}')
 EXTERNALDNS_HOSTNAME_OVERLAY=$(cat overlays/contour/external-dns-hostname-overlay.yaml | sed "s/INGRESS_DOMAIN/$CONFIGURED_INGRESS_DOMAIN/")
-kubectl create configmap external-dns-hostname-overlay --from-literal=external-dns-hostname-overlay.yaml=$EXTERNALDNS_HOSTNAME_OVERLAY -n tanzu-system-ingress
+kubectl create configmap external-dns-hostname-overlay --from-literal=external-dns-hostname-overlay.yaml="$EXTERNALDNS_HOSTNAME_OVERLAY" -n tanzu-system-ingress
 cat extensions/tkg-extensions-v1.3.0/extensions/ingress/contour/contour-extension.yaml | sed "s/name: contour-data-values/name: contour-data-values\n                - configMapRef:\n                    name: external-dns-hostname-overlay/" | kubectl apply -f-
 
 # External DNS
@@ -41,5 +41,5 @@ if [ -n "$CONFIGURED_GCP_PROJECT_NAME" ]; then
 fi
 EXTERNALDNS_DATAVALUES=$(echo $EXTERNALDNS_DATAVALUES | sed "s/REPLACE_WITH_INGRESS_DOMAIN/$CONFIGURED_INGRESS_DOMAIN/")
 
-kubectl create secret generic external-dns-data-values --from-literal=values.yaml=$EXTERNALDNS_DATAVALUES -n tanzu-system-service-discovery
+kubectl create secret generic external-dns-data-values --from-literal=values.yaml="$EXTERNALDNS_DATAVALUES" -n tanzu-system-service-discovery
 kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/service-discovery/external-dns/external-dns-extension.yaml
