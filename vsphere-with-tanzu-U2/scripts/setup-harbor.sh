@@ -7,9 +7,9 @@ cp extensions/tkg-extensions-v1.3.0/extensions/registry/harbor/harbor-data-value
 ./extensions/tkg-extensions-v1.3.0/extensions/registry/harbor/generate-passwords.sh generated/harbor-data-values.yaml
 
 # Configure ingress domain
-CONFIGURED_INGRESS_DOMAIN="harbor."
-CONFIGURED_INGRESS_DOMAIN+=$(cat $VALUES_YAML | grep ingress -A 3 | awk '/domain:/ {print $2}')
-cat generated/harbor-data-values.yaml | sed "s/core.harbor.domain/$CONFIGURED_INGRESS_DOMAIN/" | tee generated/harbor-data-values.yaml
+HARBOR_HOSTNAME="harbor."
+HARBOR_HOSTNAME+=$(cat $VALUES_YAML | grep ingress -A 3 | awk '/domain:/ {print $2}')
+cat generated/harbor-data-values.yaml | sed "s/core.harbor.domain/$HARBOR_HOSTNAME/" | tee generated/harbor-data-values.yaml
 # Use Ingress instead of HTTPProxy
 cat generated/harbor-data-values.yaml | sed "s/enableContourHttpProxy: true/enableContourHttpProxy: false/" | tee generated/harbor-data-values.yaml
 # Set placeholder Ingress certificate configuration for the overlay
