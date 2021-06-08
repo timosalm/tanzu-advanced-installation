@@ -125,7 +125,7 @@ Wait until the descriptions equal "Reconcile succeeded".
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
 
 #### Via TKG extension which may not be supported
-The setup script will run a script that is part of the TKG extensions to generate required passwords. The generate password script requires jq version <=3. Install it e.g. with `snap install yq --channel=v3/stable`.
+The setup script will run a script that is part of the TKG extensions to generate required passwords. The generate password script requires jq version <=3. Install it e.g. with `sudo snap install yq --channel=v3/stable`.
 
 ```
 ./scripts/setup-harbor.sh
