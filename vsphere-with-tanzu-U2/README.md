@@ -134,6 +134,7 @@ watch kubectl get apps -A
 Wait until the description equals "Reconcile succeeded".
 
 #### Via Helm chart
+helm has to be installed e.g. via `sudo snap install helm`
 ```
 ./scripts/setup-harbor-helm.sh
 watch kubectl get pods -n harbor
@@ -187,6 +188,7 @@ docker login registry.pivotal.io
 - *Fixed via scripts* `forbidden: PodSecurityPolicy: unable to admit pod: []`. In this case we just assign the privilged psp role to anything that is authenticated.
 
 ### (Otional) Install GitLab
+helm has to be installed e.g. via `sudo snap install helm`
 ```
 ./scripts/setup-gitlab.sh
 ```
