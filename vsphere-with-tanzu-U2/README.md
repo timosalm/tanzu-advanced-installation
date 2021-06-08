@@ -22,17 +22,18 @@ The installation was tested with the following environments:
 ### Download and install the Kubernetes CLI Tools for vSphere
 *Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-0F6E45C4-3CB1-4562-9370-686668519FCA.html?hWord=N4IghgNiBcINYFcBGBTAxgFygXyA*
 
-*PEZHint: Because you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
+Open the *Link to CLI Tools*, select Linux as the operating system and copy the link via context menu of the *DOWNLOAD CLI PLUGIN LINUX* button.
 ```
+wget <copied-link>
 unzip vsphere-plugin.zip
 chmod +x bin/kubectl bin/kubectl-vsphere
 sudo mv bin/* /usr/local/bin/
 ```
-
+*PEZHint: If you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
 ### Download and install the carvel tools
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-install-cli.html#download-and-unpack-the-tanzu-cli-and-kubectl-1*, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html#install-carvel*
 
-The easiest way to get all the carvel tools is to download them bundled with the Tanzu CLI.
+The easiest way to get all the carvel tools is to download them bundled with the Tanzu CLI or as an alternative from https://carvel.dev/
 ```
 cd cli
 gunzip *.gz
