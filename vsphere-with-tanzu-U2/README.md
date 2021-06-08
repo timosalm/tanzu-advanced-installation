@@ -174,6 +174,7 @@ pivnet download-product-files --product-slug='build-service' --release-version='
 # descriptor-100.0.103.yaml
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.103' --product-file-id=954775 --download-dir=tbs/
 ```
+Go to your Harbor registry and create a private project with the name "build-service".
 
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
 ```
