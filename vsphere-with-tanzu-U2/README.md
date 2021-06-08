@@ -90,6 +90,7 @@ Unpack the extensions archive in the root of this project(extensions/tkg-extensi
 
 ```
 tar -xzf tkg-extensions-manifests-v1.3.0-vmware.1.tar.gz -C extensions/
+mv extensions/tkg-extensions-v1.3.0+vmware.1 extensions/tkg-extensions-v1.3.0
 ```
 **Known Issues:** 
 - Tanzu Kubernetes Grid (TKG) 1.3.0 extensions do not function on Tanzu Kubernetes Grid Service clusters when attached to Tanzu Mission Control (TMC): https://kb.vmware.com/s/article/83322
