@@ -34,8 +34,6 @@ cat overlays/contour/external-dns-hostname-overlay.yaml | sed "s/INGRESS_DOMAIN/
 kubectl create configmap external-dns-hostname-overlay --from-file=external-dns-hostname-overlay.yaml=generated/external-dns-hostname-overlay.yaml -n tanzu-system-ingress
 cat extensions/tkg-extensions-v1.3.0/extensions/ingress/contour/contour-extension.yaml | sed "s/name: contour-data-values/name: contour-data-values\n                - configMapRef:\n                    name: external-dns-hostname-overlay/" | kubectl apply -f-
 
-kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/ingress/contour/contour-extension.yaml
-
 # External DNS
 kubectl apply -f extensions/tkg-extensions-v1.3.0/extensions/service-discovery/external-dns/namespace-role.yaml
 
