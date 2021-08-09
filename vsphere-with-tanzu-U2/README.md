@@ -22,17 +22,18 @@ The installation was tested with the following environments:
 ### Download and install the Kubernetes CLI Tools for vSphere
 *Documentation: https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-0F6E45C4-3CB1-4562-9370-686668519FCA.html?hWord=N4IghgNiBcINYFcBGBTAxgFygXyA*
 
-*PEZHint: Because you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
+Open the *Link to CLI Tools*, select Linux as the operating system and copy the link via context menu of the *DOWNLOAD CLI PLUGIN LINUX* button.
 ```
+wget <copied-link>
 unzip vsphere-plugin.zip
 chmod +x bin/kubectl bin/kubectl-vsphere
 sudo mv bin/* /usr/local/bin/
 ```
-
+*PEZHint: If you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
 ### Download and install the carvel tools
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-install-cli.html#download-and-unpack-the-tanzu-cli-and-kubectl-1*, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html#install-carvel*
 
-The easiest way to get all the carvel tools is to download them bundled with the Tanzu CLI.
+The easiest way to get all the carvel tools is to download them bundled with the Tanzu CLI or as an alternative from https://carvel.dev/
 ```
 cd cli
 gunzip *.gz
@@ -85,6 +86,12 @@ kubectl config use-context <your-workload-cluster-name>
 
 Unpack the extensions archive in the root of this project(extensions/tkg-extensions-v1.3.0/...).
 
+*PEZHint: If you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
+
+```
+tar -xzf tkg-extensions-manifests-v1.3.0-vmware.1.tar.gz -C extensions/
+mv extensions/tkg-extensions-v1.3.0+vmware.1 extensions/tkg-extensions-v1.3.0
+```
 **Known Issues:** 
 - Tanzu Kubernetes Grid (TKG) 1.3.0 extensions do not function on Tanzu Kubernetes Grid Service clusters when attached to Tanzu Mission Control (TMC): https://kb.vmware.com/s/article/83322
 
@@ -118,7 +125,7 @@ Wait until the descriptions equal "Reconcile succeeded".
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
 
 #### Via TKG extension which may not be supported
-The setup script will run a script that is part of the TKG extensions to generate required passwords. The generate password script requires jq version <=3. Install it e.g. with `snap install yq --channel=v3/stable`.
+The setup script will run a script that is part of the TKG extensions to generate required passwords. The generate password script requires jq version <=3. Install it e.g. with `sudo snap install yq --channel=v3/stable`.
 
 ```
 ./scripts/setup-harbor.sh
@@ -127,6 +134,7 @@ watch kubectl get apps -A
 Wait until the description equals "Reconcile succeeded".
 
 #### Via Helm chart
+helm has to be installed e.g. via `sudo snap install helm --classic`
 ```
 ./scripts/setup-harbor-helm.sh
 watch kubectl get pods -n harbor
@@ -167,6 +175,7 @@ pivnet download-product-files --product-slug='build-service' --release-version='
 # descriptor-100.0.103.yaml
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.103' --product-file-id=954775 --download-dir=tbs/
 ```
+Go to your Harbor registry and create a private project with the name "build-service".
 
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
 ```
@@ -179,6 +188,7 @@ docker login registry.pivotal.io
 - *Fixed via scripts* `forbidden: PodSecurityPolicy: unable to admit pod: []`. In this case we just assign the privilged psp role to anything that is authenticated.
 
 ### (Otional) Install GitLab
+helm has to be installed e.g. via `sudo snap install helm --classic`
 ```
 ./scripts/setup-gitlab.sh
 ```

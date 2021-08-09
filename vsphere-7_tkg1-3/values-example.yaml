@@ -53,8 +53,8 @@ acme:
 aws: # Remove nested properties if you are not using Route53 to manage the domain / for external DNS
   region: us-east-1
   credentials:
-    secretKey: SECRET
     accessKey: ACCESS
+    secretKey: SECRET
 gcp: # Remove nested properties if you are not using GCP to manage the domain / for external DNS
   project: project-name
   key: # Base64 encoded gcp.key.json file content
