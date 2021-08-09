@@ -1,0 +1,10 @@
+/values.yaml
+generated/*
+!generated/README.md
+.envrc
+TODO.md
+extensions/*
+!extensions/README.md
+tbs/*
+!tbs/README.md
+

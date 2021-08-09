@@ -1,0 +1,26 @@
+#@data/values
+---
+ingress:
+  domain: demo.example.com
+  contour_tls_namespace: tanzu-system-ingress
+  contour_tls_secret: contour-tls-delegation-cert
+acme:
+  email: user@example.com
+aws: # Remove nested properties if you are not using Route53 to manage the domain / for external DNS
+  region: us-east-1
+  credentials:
+    secretKey: SECRET
+    accessKey: ACCESS
+gcp: # Remove nested properties if you are not using GCP to manage the domain / for external DNS
+  project: project-name
+  key: # Base64 encoded gcp.key.json file content
+psp:
+  cluster_role:
+harbor:
+  adminPassword: <PASSWORD>
+  diskSize: 50Gi
+tanzunet:
+  username: user@example.com
+  password: <PASSWORD>
+registry:
+  dockerhub: docker.io

@@ -1,0 +1,56 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+
+#@ if data.values.aws != None:
+---
+apiVersion: v1
+data:
+  secret-access-key: #@ base64.encode(data.values.aws.credentials.secretKey)
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: prod-route53-credentials-secret
+  namespace: cert-manager
+#@ end
+#@ if data.values.gcp != None:
+---
+apiVersion: v1
+data: {
+  "gcp.key.json": #@ data.values.gcp.key
+}
+kind: Secret
+metadata:
+  name: prod-gcp-credentials-secret
+  namespace: cert-manager
+#@ end
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-contour-cluster-issuer
+  namespace: tanzu-system-ingress
+spec:
+  acme:
+    email: #@ data.values.acme.email
+    privateKeySecretRef:
+      name: acme-account-key
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+      #@ if data.values.aws != None:
+      - dns01:
+          route53:
+            region: #@ data.values.aws.region
+            accessKeyID: #@ data.values.aws.credentials.accessKey
+            secretAccessKeySecretRef:
+              name: prod-route53-credentials-secret
+              key: secret-access-key
+      #@ end
+      #@ if data.values.gcp != None:
+      - dns01:
+          clouddns:
+            project: #@ data.values.gcp.project
+            serviceAccountSecretRef:
+              name: prod-gcp-credentials-secret
+              key: gcp.key.json
+      #@ end
+
