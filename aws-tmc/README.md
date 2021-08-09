@@ -107,12 +107,13 @@ Due to the large size of the TBS container images:
 - There might be performance issues if for example the environment is using spinning disks instead of SSDs due to the size of the container images for the buildpacks (503 Service Unavailable). 
 - Ensure that all worker nodes have at least 50 GB of ephemeral storage allocated to them.
 
+## Install other Tanzu Adavanced products
 ### Install Tanzu Build Service 1.2
 *Documentation: https://docs.pivotal.io/build-service/1-2/installing.html*
 
 Ensure that all worker nodes have at least 50 GB of ephemeral storage allocated to them.
 
-### Download the kp CLI from the [Tanzu Build Service page](https://network.tanzu.vmware.com/products/build-service/) of Tanzu Network.
+#### Download the kp CLI from the [Tanzu Build Service page](https://network.tanzu.vmware.com/products/build-service/) of Tanzu Network.
 
 As an alternative to the download via browser, you can download the files via the [pivnet cli](https://github.com/pivotal-cf/pivnet-cli/releases).
 ```
@@ -129,7 +130,7 @@ pivnet download-product-files --product-slug='build-service' --release-version='
 chmod +x kp-linux-0.3.1
 sudo mv kp-linux-0.3.1 /usr/local/bin/kp
 ```
-### Installation
+#### Installation
 
 There is a known issue with TBS 1.2 if docker is installed with snap: https://docs.pivotal.io/build-service/1-2/faq.html#faq-17
 ```
@@ -144,7 +145,7 @@ It's recommended to have a look at the following script and overlays before you 
 **Known Issues:** 
 - See "Known Issues" for Harbor
 
-## Install Cloud Native Runtimes for VMware Tanzu
+### Install Cloud Native Runtimes for VMware Tanzu
 *Documentation: https://docs.vmware.com/en/Cloud-Native-Runtimes-for-VMware-Tanzu/1.0/tanzu-cloud-native-runtimes-1-0/GUID-cnr-overview.html* 
 Download the CNR from the [CNR page](https://network.tanzu.vmware.com/products/serverless/) of Tanzu Network.
 As an alternative to the download via browser, you can download the files via the [pivnet cli](https://github.com/pivotal-cf/pivnet-cli/releases).
@@ -167,7 +168,7 @@ Run the script for the installation.
 See "Configure TLS Certificate Delegation" for the CNR configured TLS certificate delegation and certificate request.
 
 After you installed CNR, you have to edit the following Kubernetes objects.
-```
+```bash
 kubectl edit cm config-domain -n knative-serving
 # data:
 #  cnr.<your-ingress-domain>: ""
@@ -184,7 +185,7 @@ kubectl edit cm config-contour -n knative-serving
 #   default-tls-secret: tanzu-system-ingress/cnr-contour-tls-delegation-cert
 ```
 
-## Configure Tanzu Observability by Wavefront and Tanzu Service Mesh via TMC Integrations
+### Configure Tanzu Observability by Wavefront and Tanzu Service Mesh via TMC Integrations
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-0AAC9FB2-AC45-4E38-AA1C-FB99A9960FAF.html, https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-5B1445AB-EFEB-41BD-B9B3-6DD38E69991F.html*
 
 ## Misc
