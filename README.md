@@ -7,3 +7,4 @@ The scripts are based on the amazing work done for TKG 1.1 [here](https://github
 ## Guides
 - [TKG 1.3 on vSphere 7](vsphere-7_tkg1-3/README.md)
 - [vSphere with Tanzu U2](vsphere-with-tanzu-U2/README.md)
+- [TMC on AWS](aws-tmc/README.md)
