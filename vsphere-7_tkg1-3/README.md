@@ -1,17 +1,17 @@
-# Unofficial Tanzu Advanced PoC guide for TKG 1.3 on vSphere 7
+# Unofficial Tanzu Advanced PoC guide for TKG 1.3.1 on vSphere 7
 
 It's always recommended to go through the official documentation in addition to this guide!
 The scripts and commands in this guide were executed on a Linux jumpbox.
 The scripts are based on the amazing work done for TKG 1.1 [here](https://github.com/tanzu-end-to-end/clusters).
 
-The setup requires a DNS zones to be able to create Let's Encrypt certificates and DNS entries to mitigate challenges with e.g. TBS and Harbor. The scripts support Route53 and GCloud DNS, but you can use any provider that is supported by cert-manager, and external-dns. 
+The setup requires a DNS zones to be able to create Let's Encrypt certificates and DNS entries to mitigate challenges with e.g. TBS, CNR and Harbor. The scripts support Route53 and GCloud DNS, but you can use any provider that is supported by cert-manager, and external-dns. 
 If you don't have a domain you can use for it, ask your colleagues. 
 
 ## Environment 
 The installation was tested with the following environments:
 - PEZ IaaS Only - vSphere (7.0 U2)
 
-## TKG-m 1.3 on vSphere 7
+## TKG-m 1.3.1 on vSphere 7
 
 ### Download and install the Tanzu CLI and kubectl
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-install-cli.html#download-and-unpack-the-tanzu-cli-and-kubectl-1*
@@ -20,10 +20,10 @@ The installation was tested with the following environments:
 
 #### Upack and install the tools
 ```
-tar -xvf tanzu-cli-bundle-linux-amd64.tar
-gunzip kubectl-linux-v1.20.4-vmware.1.gz
+tar -xvf tanzu-cli-bundle-v1.3.1-linux-amd64.tar
+gunzip  kubectl-linux-v1.20.5-vmware.1.gz
 cd cli
-sudo install core/v1.3.0/tanzu-core-linux_amd64 /usr/local/bin/tanzu
+sudo install core/v1.3.1/tanzu-core-linux_amd64 /usr/local/bin/tanzu
 cd ..
 tanzu plugin install --local cli all
 tanzu plugin list
@@ -50,7 +50,7 @@ sudo mv ytt-linux-amd64-v0.30.0+vmware.1 /usr/local/bin/ytt
 *PEZHint: Because you have to download the artifacts via the browser, with a PEZ env you can use the Windows jump box and transfer them via WinSCP to the unix jumpbox.*
 
 **Known Issues:** 
-- There is a bug with Photon v3 Kubernetes v1.20.4 OVA image(photon-3-kube-v1.20.4-vmware.1-tkg.0-2326554155028348692.ova) and kube-vip, use the Ubuntu image instead! 
+- There is a bug with Photon v3 Kubernetes v1.20.4 OVA image(photon-3-kube-v1.20.4-vmware.1-tkg.0-2326554155028348692.ova) and kube-vip, use the Ubuntu or a newer image instead! 
 
 #### Create an SSH Key Pair to be able to connect to the node VMs
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-mgmt-clusters-vsphere.html#create-an-ssh-key-pair-6*
@@ -78,8 +78,11 @@ ip addr
 ss -ltmp # see ports listening
 ss -ltm
 ``` 
-
-#### Copy values-example.yaml to values.yaml and set configuration values
+#### Copy values-example.yaml to values.yaml, set configuration values and set env variable
+```
+cp values-example.yaml values.yaml
+export VALUES_YAML=values.yaml
+```
 - The values that are already set as an example are based on a specific PEZ environment - change them for your environment if necessary
 - Select a static ip for the control planes enpoints that are not in the DHCP Range.
 - To register your managment cluster with TMC follow the instructions [here](https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-EB507AAF-5F4F-400F-9623-BA611233E0BD.html) and configure the URL provided on the register page in the values.yaml
@@ -105,10 +108,15 @@ tanzu cluster kubeconfig get <workload-cluster-name> --admin
 kubectl config use-context <workload-cluster-name>-admin@<workload-cluster-name>
 ```
 
-### Download and Unpack the Tanzu Kubernetes Grid Extensions Bundle 1.3
+### Download and Unpack the Tanzu Kubernetes Grid Extensions Bundle 1.3.1
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html?hWord=N4IghgNiBcIMYFMBOAXAtAWzAOzAc2RAF8g#download-and-unpack-the-tanzu-kubernetes-grid-extensions-bundle-2*
 
-Unpack the extensions archive in the root of this project(extensions/tkg-extensions-v1.3.0/...).
+Unpack the extensions archive in the root of this project(e.g. extensions/tkg-extensions-v1.3.1+vmware.1/...).
+
+Set the folowing env variable to this directory for the scripts.
+```
+export TKG_EXTENSIONS_FOLDER_NAME=tkg-extensions-v1.3.1+vmware.1
+```
 
 ### Install cert-manager, contour, and external-dns via TKG extensions
 *Documentation: https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-index.html?hWord=N4IghgNiBcIMYFMBOAXAtAWzAOzAc2RAF8g#installing-extension-prerequisite-components-to-a-cluster-4, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-ingress-contour.html, https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.3/vmware-tanzu-kubernetes-grid-13/GUID-extensions-external-dns.html*
@@ -138,7 +146,7 @@ Wait until the descriptions equal "Reconcile succeeded".
 
 ### Install Harbor via TKG extension
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
-The setup script will run a script that is part of the TKG extensions to generate required passwords. The generate password script requires jq version <=3. Install it e.g. with `snap install yq --channel=v3/stable`.
+The setup script will run a script that is part of the TKG extensions to generate required passwords.
 
 ```
 ./scripts/setup-harbor.sh
@@ -152,12 +160,12 @@ Due to the large size of the TBS container images:
 - There might be performance issues if for example the environment is using spinning disks instead of SSDs due to the size of the container images for the buildpacks (503 Service Unavailable). 
 - Ensure that all worker nodes have at least 50 GB of ephemeral storage allocated to them.
 
-### Install Tanzu Build Service 1.1
-*Documentation: https://docs.pivotal.io/build-service/1-1/installing.html*
+### Install Tanzu Build Service 1.2
+*Documentation: https://docs.pivotal.io/build-service/1-2/installing.html*
 
 Ensure that all worker nodes have at least 50 GB of ephemeral storage allocated to them.
 
-Download the Build Service Bundle and kp CLI from the [Tanzu Build Service page](https://network.tanzu.vmware.com/products/build-service/) and the descriptor-<version>.yaml file from the [Tanzu Build Service Dependencies](https://network.tanzu.vmware.com/products/tbs-dependencies/) of Tanzu Network.
+#### Download the kp CLI from the [Tanzu Build Service page](https://network.tanzu.vmware.com/products/build-service/) of Tanzu Network.
 
 As an alternative to the download via browser, you can download the files via the [pivnet cli](https://github.com/pivotal-cf/pivnet-cli/releases).
 ```
@@ -170,26 +178,64 @@ The api token you need for the login can be fetched from the ["Edit Profile page
 
 To see the command to download a resource from Tanzu Network click on the info icon.
 ```
-# kp cli
-pivnet download-product-files --product-slug='build-service' --release-version='1.1.4' --product-file-id=883031
-chmod +x kp-linux-0.2.0
-sudo mv kp-linux-0.2.0 /usr/local/bin/kp
-
-# TBS bundle
-pivnet download-product-files --product-slug='build-service' --release-version='1.1.4' --product-file-id=904252 --download-dir=tbs/
-
-# descriptor-100.0.103.yaml
-pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.103' --product-file-id=954775 --download-dir=tbs/
+pivnet download-product-files --product-slug='build-service' --release-version='1.2.2' --product-file-id=1000629
+chmod +x kp-linux-0.3.1
+sudo mv kp-linux-0.3.1 /usr/local/bin/kp
 ```
+#### Installation
 
+There is a known issue with TBS 1.2 if docker is installed with snap: https://docs.pivotal.io/build-service/1-2/faq.html#faq-17
+```
+sudo cp snap/docker/796/.docker/config.json ~/.docker/config.json
+sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
+sudo chmod g+rwx "/home/$USER/.docker" -R
+```
 It's recommended to have a look at the following script and overlays before you run it (and maybe run every of the commands manually).
 ```
-docker login registry.pivotal.io
-./scripts/setup-tbs.sh tbs/build-service-1.1.4.tar tbs/descriptor-100.0.102.yaml
+./scripts/setup-tbs.sh
 ```
 **Known Issues:** 
 - See "Known Issues" for Harbor
-- There is a bug in containerd 1.4.1(TKGm 1.2.1) that makes it incompatible with TBS.
+
+### Install Cloud Native Runtimes for VMware Tanzu
+*Documentation: https://docs.vmware.com/en/Cloud-Native-Runtimes-for-VMware-Tanzu/1.0/tanzu-cloud-native-runtimes-1-0/GUID-cnr-overview.html* 
+Download the CNR from the [CNR page](https://network.tanzu.vmware.com/products/serverless/) of Tanzu Network.
+As an alternative to the download via browser, you can download the files via the [pivnet cli](https://github.com/pivotal-cf/pivnet-cli/releases).
+
+To see the command to download the resource from Tanzu Network click on the info icon.
+```
+pivnet download-product-files --product-slug='serverless' --release-version='1.0.1+build.58' --product-file-id=1007924
+```
+
+Unpack the archive.
+```
+tar -xvf cloud-native-runtimes-1.0.1.tgz
+```
+
+Run the script for the installation.
+```
+./scripts/setup-cnr.sh
+```
+
+See "Configure TLS Certificate Delegation" for the CNR configured TLS certificate delegation and certificate request.
+
+After you installed CNR, you have to edit the following Kubernetes objects.
+```bash
+kubectl edit cm config-domain -n knative-serving
+# data:
+#  cnr.<your-ingress-domain>: ""
+kubectl edit cm config-certmanager -n knative-serving
+# data:
+#  issuerRef: |
+#   kind: ClusterIssuer
+#   name: letsencrypt-contour-cluster-issuer
+kubectl edit configmap config-network --namespace knative-serving
+# data:
+#   domainTemplate: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
+kubectl edit cm config-contour -n knative-serving
+# data:
+#   default-tls-secret: tanzu-system-ingress/cnr-contour-tls-delegation-cert
+```
 
 ## Misc
 

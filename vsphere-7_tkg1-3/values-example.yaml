@@ -58,6 +58,9 @@ aws: # Remove nested properties if you are not using Route53 to manage the domai
 gcp: # Remove nested properties if you are not using GCP to manage the domain / for external DNS
   project: project-name
   key: # Base64 encoded gcp.key.json file content
+tanzunet:
+  username: user@example.com
+  password: <PASSWORD>
 harbor:
-  adminPassword: 
+  adminPassword: <PASSWORD>
   diskSize: 50Gi

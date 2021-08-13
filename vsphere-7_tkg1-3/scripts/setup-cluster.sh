@@ -1,6 +1,5 @@
 #!/bin/bash
 TANZU_CMD=${TANZU_CMD:-tanzu }
-VALUES_YAML=values.yaml
 WORKLOAD_CLUSTER_NAME=$1
 
 if [ ! -f ~/.tanzu/tkg/config.yaml ]; then
