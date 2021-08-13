@@ -3,12 +3,12 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: #@ data.values.ingress.contour_tls_secret
+  name: #@ "cnr-{}".format(data.values.ingress.contour_tls_secret)
   namespace: #@ data.values.ingress.contour_tls_namespace
 spec:
-  commonName: #@ "*.{}".format(data.values.ingress.domain)
+  commonName: #@ "*.cnr.{}".format(data.values.ingress.domain)
   dnsNames:
-  - #@ "*.{}".format(data.values.ingress.domain)
+  - #@ "*.cnr.{}".format(data.values.ingress.domain)
   duration: 2160h0m0s
   issuerRef:
     kind: ClusterIssuer
@@ -19,4 +19,4 @@ spec:
   organization:
   - vmware
   renewBefore: 360h0m0s
-  secretName: #@ data.values.ingress.contour_tls_secret
+  secretName: #@ "cnr-{}".format(data.values.ingress.contour_tls_secret)
