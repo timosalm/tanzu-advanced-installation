@@ -1,0 +1,26 @@
+#@ load("@ytt:data", "data")
+postgresql:
+  postgresqlPassword: "PuLbxCgHFm8_w@Wf"
+artifactory:
+  image:
+    registry: releases-docker.jfrog.io
+    repository: jfrog/artifactory-oss
+  admin:
+    password: "C76UJBFrTiJP@bze"
+  configMapName: artifactory-oss-bootstrap-config
+nginx:
+  enabled: false
+ingress:
+  enabled: true
+  defaultBackend:
+    enabled: false
+  hosts:
+  - #@ "artifactory.{}".format(data.values.ingress.domain)
+  annotations:
+    kubernetes.io/ingress.class: contour
+  service:
+    type: ClusterIP
+  tls:
+    - hosts:
+      - #@ "artifactory.{}".format(data.values.ingress.domain)
+      secretName: #@ "{}/{}".format(data.values.ingress.contour_tls_namespace,data.values.ingress.contour_tls_secret)

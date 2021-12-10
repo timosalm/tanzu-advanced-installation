@@ -1,0 +1,41 @@
+#@data/values
+---
+ingress:
+  domain: example.com
+  contour_tls_namespace: tanzu-system-ingress
+  contour_tls_secret: contour-tls-delegation-cert
+acme:
+  email: user@example.com
+aws:
+  region: eu-central-1
+  credentials:
+    accessKey: 
+    secretKey: 
+  zoneId: Z04637761VEC48IKSQS06
+  externalDnsRoleArn: arn:aws:iam::323456981663:role/HostedZoneChanger
+harbor:
+  adminPassword: 
+  diskSize: 50Gi
+  dbDiskSize: 3Gi
+tanzunet:
+  username: user@example.com
+  password: 
+concourse:
+  username: admin
+  password: 
+  requiredNodeType: true
+  regionAz: eu-central-1a
+argocd:
+  adminPassword: 
+gitea:
+  adminPassword: 
+psp:
+  cluster_role: ""
+registry:
+  dockerhub: docker.io
+eduk8s:
+  adminPassword: 
+  robotPassword: 
+myvmware:
+  user: user@example.com
+  password:

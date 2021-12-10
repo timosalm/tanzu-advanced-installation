@@ -1,0 +1,33 @@
+#@ load("@ytt:data", "data")
+---
+infrastructure_provider: aws
+namespace: tanzu-system-ingress
+contour:
+ configFileContents: {}
+ useProxyProtocol: false
+ replicas: 2
+ pspNames: "vmware-system-restricted"
+ logLevel: info
+envoy:
+ service:
+   type: LoadBalancer
+   annotations:
+     external-dns.alpha.kubernetes.io/hostname: #@ "*.{}".format(data.values.ingress.domain) 
+   nodePorts:
+     http: null
+     https: null
+   externalTrafficPolicy: Cluster
+   aws:
+     LBType: classic
+   disableWait: false
+ hostPorts:
+   enable: true
+   http: 80
+   https: 443
+ hostNetwork: false
+ terminationGracePeriodSeconds: 300
+ logLevel: info
+ pspNames: null
+certificates:
+ duration: 8760h
+ renewBefore: 360h

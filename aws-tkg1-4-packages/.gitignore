@@ -1,0 +1,11 @@
+aws-ssh-keys/
+kubeconfig
+tanzu-cli-config-backup/
+wkld-cluster/generated/
+wkld-cluster/values.yaml
+wkld-cluster/kubeconfig-wkld-e2e-demo
+
+### IntelliJ IDEA ###
+.idea
+### VS Code ###
+.vscode/
