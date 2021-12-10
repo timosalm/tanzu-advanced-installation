@@ -29,6 +29,8 @@ AWS_REGION=eu-central-1 tanzu cluster create wkld-cluster --file wkld-cluster/cl
 ```
 
 ## Installation of TKG packages and other tools on the workload cluster
+See documentation for the TKG packages [here](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.4/vmware-tanzu-kubernetes-grid-14/GUID-packages-index.html)
+My recommendation is to follow the steps in the documentation and compare them with the commands in the scripts. 
 
 Prerequisites:
 - Docker
